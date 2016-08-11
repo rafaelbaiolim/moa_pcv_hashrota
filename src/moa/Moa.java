@@ -161,7 +161,6 @@ class Moa {
         gerarDistancias(rotaB);
         populacao.put(rotaB.idRota, rotaB);
         gerarMutacao(rotaA, rotaB);
-
     }
 
     public Rota executarGeneticoPcv(Rota rotaInicial) {
@@ -171,7 +170,7 @@ class Moa {
         populacao.put(rotaInicial.idRota, rotaInicial);
         avaliacao(populacao);
 
-        for (int i = 0; i <= 249; i++) {
+        for (int i = 0; i <= 49; i++) {
             Rota conjuntoPermutado = new Rota();
             conjuntoPermutado.setRota(rotaInicial.getPermutacaoCnjCidade(rotaInicial.getRota()));
             populacao.put(conjuntoPermutado.idRota, conjuntoPermutado);

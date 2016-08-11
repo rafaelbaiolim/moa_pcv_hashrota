@@ -1,4 +1,3 @@
-
 package moa;
 
 import java.util.*;
@@ -10,11 +9,15 @@ import java.util.*;
 class Rota implements Comparable<Rota> {
 
     protected double distancia;
-    ArrayList<Cidade> rota;
+    private static int idRotaGlobal = 0;
+    protected int idRota;
+    ArrayList<Cidade> rota; 
 
     Rota() {
+        this.idRota += idRotaGlobal;
         this.distancia = 0;
         rota = new ArrayList<>();
+        idRotaGlobal++;
     }
 
     @Override
