@@ -11,7 +11,7 @@ class Rota implements Comparable<Rota> {
     protected double distancia;
     private static int idRotaGlobal = 0;
     protected int idRota;
-    ArrayList<Cidade> rota; 
+    ArrayList<Cidade> rota;
 
     Rota() {
         this.idRota += idRotaGlobal;
@@ -40,8 +40,18 @@ class Rota implements Comparable<Rota> {
     }
 
     protected ArrayList<Cidade> getPermutacaoCnjCidade(ArrayList<Cidade> cnjInicial) {
+        Random gerador = new Random();
+
+        int ind1 = gerador.nextInt(48);
+        int ind2 = gerador.nextInt(48);
+
+        int ind3 = gerador.nextInt(48);
+        int ind4 = gerador.nextInt(48);
+
         ArrayList<Cidade> cloneCnjInicial = (ArrayList<Cidade>) cnjInicial.clone();
-        Collections.shuffle(cloneCnjInicial);
+        Collections.swap(cloneCnjInicial, ind1, ind2);
+        Collections.swap(cloneCnjInicial, ind3, ind4);
+
         return cloneCnjInicial;
     }
 

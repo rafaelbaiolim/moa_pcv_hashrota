@@ -54,7 +54,7 @@ class Moa {
     }
 
     protected void getSelecao(HashMap<Integer, Rota> populacao) {
-        PriorityQueue<Rota> Q = new PriorityQueue<>(Collections.reverseOrder());
+        PriorityQueue<Rota> Q = new PriorityQueue<>();
         Iterator it = populacao.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry<Integer, Rota> rota = (Map.Entry) it.next();
@@ -69,7 +69,7 @@ class Moa {
     }
 
     public void gerarMutacao(Rota perA, Rota perB) {
-        PriorityQueue<Rota> Q = new PriorityQueue<>();
+        PriorityQueue<Rota> Q = new PriorityQueue<>(Collections.reverseOrder());
 
         Iterator it = populacao.entrySet().iterator();
         while (it.hasNext()) {
@@ -129,7 +129,7 @@ class Moa {
 
     public void cruzamento(Rota rotaX, Rota rotaY) {
         int meio = Math.round(rotaX.getRota().size() / 2) - 1;
-        int pontoCorte = Math.round(rotaX.getRota().size() / 20);
+        int pontoCorte = Math.round(rotaX.getRota().size() / 8);
         int sizeRotas = rotaX.getRota().size();
         boolean inHash = false;
         HashMap<Integer, Integer> novaRotaA = new HashMap<>();
@@ -170,7 +170,7 @@ class Moa {
         populacao.put(rotaInicial.idRota, rotaInicial);
         avaliacao(populacao);
 
-        for (int i = 0; i <= 49; i++) {
+        for (int i = 0; i < 49; i++) {
             Rota conjuntoPermutado = new Rota();
             conjuntoPermutado.setRota(rotaInicial.getPermutacaoCnjCidade(rotaInicial.getRota()));
             populacao.put(conjuntoPermutado.idRota, conjuntoPermutado);
@@ -197,10 +197,10 @@ class Moa {
         // Rota entrada 
         Rota conjunto = new Rota();
         conjunto.setRota(moa.getRotaInicial());
-        Rota conj = moa.executarGeneticoPcv(conjunto);
-        System.out.println("Result : " + (int) conj.distancia);
+        Rota result = moa.executarGeneticoPcv(conjunto);
+        System.out.println("Result : " + (int) result.distancia);
 
-        for (Cidade c : conj.getRota()) {
+        for (Cidade c : result.getRota()) {
             System.out.print(c.idCidade + " ");
         }
     }
