@@ -163,6 +163,10 @@ class Moa {
         gerarMutacao(rotaA, rotaB);
     }
 
+    public void executarBuscaLocal(HashMap<Integer, Rota> populacao) {
+
+    }
+
     public Rota executarGeneticoPcv(Rota rotaInicial) {
         long t = System.currentTimeMillis();
         long end = t + 9000;
@@ -180,6 +184,7 @@ class Moa {
         while (System.currentTimeMillis() < end) {
             avaliacao(populacao);
             getSelecao(populacao);
+            executarBuscaLocal(populacao);
         }
 
         Iterator it = populacao.entrySet().iterator();
