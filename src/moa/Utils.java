@@ -65,6 +65,7 @@ public class Utils {
         return ret.split("\n");
     }
 
+    /*
     public static Rota gerarSeed() {
         ArrayList<Cidade> seed = new ArrayList<Cidade>();
         Cidade cidade0 = new Cidade();
@@ -147,5 +148,5 @@ public class Utils {
         }
 
     }
-
+     */
 }
