@@ -1,20 +1,18 @@
 package moa;
 
-import java.math.RoundingMode;
 import java.util.Collections;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Random;
-import java.util.Scanner;
 
 class Moa {
 
     static int idRotaGlobal = 0;
     static int TOTAL_CIDADES = 0;
     static HashMap<Integer, Rota> populacao = new HashMap<>();
-    static final int TOTAL_POPULACAO = 49;
+    static final int TOTAL_POPULACAO = 39;
     static final int TAXA_MUTACAO = 20;
     static final int TAXA_SELECAO = 20;
     static final boolean FAZER_BUSCA_LOCAL = true;
@@ -219,7 +217,7 @@ class Moa {
 
     protected void cruzamento(Rota rotaX, Rota rotaY) {
         int meio = Math.round(rotaX.getRota().size() / 2) - 1;
-        int pontoCorte = Math.round(rotaX.getRota().size() / 10);
+        int pontoCorte = Math.round(rotaX.getRota().size() / 8);
         int sizeRotas = rotaX.getRota().size();
         boolean inHash = false;
         HashMap<Integer, Integer> novaRotaA = new HashMap<>();
@@ -253,33 +251,34 @@ class Moa {
         gerarMutacao(rotaA, rotaB);
     }
 
-    protected Rota executarBuscaLocal(Rota rotaAtual) {
+    protected Rota executarBuscaLocal(Rota rotaAtual, boolean first) {
 
-        ArrayList<Cidade> vizinho = new ArrayList<>();
-        vizinho = rotaAtual.getRota();
-
-        for (int i = 3; i < vizinho.size(); i += 4) {
-            for (int j = i + 3; j > 0; j--) {
-                try {
-                    Collections.swap(vizinho, j, i);
-                    Collections.swap(vizinho, j + 1, j + 2);
-                } catch (IndexOutOfBoundsException idb) {
+        ArrayList<Cidade> rota = new ArrayList<>();
+        Rota melhorRota = new Rota();
+        rota = rotaAtual.getRota();
+        melhorRota = rotaAtual;
+        for (int i = 0; i < TOTAL_CIDADES - 3; i++) {
+            ArrayList<Cidade> cloneRota = new ArrayList<>(rotaAtual.getRota());
+            cloneRota.set(i, rota.get(i + 3));
+            cloneRota.set(i + 1, rota.get(i + 2));
+            cloneRota.set(i + 2, rota.get(i + 1));
+            cloneRota.set(i + 3, rota.get(i));
+            Rota rotaVizinho = new Rota();
+            rotaVizinho.setRota(rota);
+            gerarDistancias(rotaVizinho);
+            if (rotaVizinho.distancia < rotaAtual.distancia) {
+                melhorRota = rotaAtual;
+                if (first) {
+                    break;
                 }
             }
         }
-        Rota rotaVizinho = new Rota();
-        Collections.reverse(vizinho);
-        rotaVizinho.setRota(vizinho);
-        gerarDistancias(rotaVizinho);
-        if (rotaVizinho.distancia < rotaAtual.distancia) {
-            return rotaVizinho;
-        }
-        return null;
+        return melhorRota;
     }
 
     protected Rota executarGeneticoPcv() {
         long t = System.currentTimeMillis();
-        long end = t + 9000;
+        long end = t + 9499;
         Rota rotaInicial = getRotaInicial();
 
         populacao.put(rotaInicial.idRota, rotaInicial);
@@ -304,10 +303,7 @@ class Moa {
         Rota menorDistancia = Q.remove();
 
         if (FAZER_BUSCA_LOCAL) {
-            Rota possivelMelhor = executarBuscaLocal(menorDistancia);
-            if (possivelMelhor != null) {
-                menorDistancia = possivelMelhor;
-            }
+            menorDistancia = executarBuscaLocal(menorDistancia, false);
         }
         return menorDistancia;
     }
