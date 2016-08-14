@@ -6,16 +6,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Random;
+import java.util.Scanner;
 
 class Moa {
 
     static int idRotaGlobal = 0;
     static int TOTAL_CIDADES = 0;
     static HashMap<Integer, Rota> populacao = new HashMap<>();
-    static final int TOTAL_POPULACAO = 39;
-    static final int TAXA_MUTACAO = 20;
-    static final int TAXA_SELECAO = 20;
-    static final boolean FAZER_BUSCA_LOCAL = true;
+    static int TOTAL_POPULACAO = 40;
+    static int TAMANHO_CORTE = 6;
+    static boolean FIRST_IMPROVEMENT = false;
 
     class Cidade {
 
@@ -58,16 +58,16 @@ class Moa {
 
         protected ArrayList<Cidade> getMutacaoCidade(ArrayList<Cidade> cnjInicial, int totalCidadaes) {
             Random gerador = new Random();
+            int ind1 = gerador.nextInt(TOTAL_CIDADES);
+            int ind2 = gerador.nextInt(TOTAL_CIDADES);
 
-            int ind1 = gerador.nextInt(totalCidadaes);
-            int ind2 = gerador.nextInt(totalCidadaes);
-
-            int ind3 = gerador.nextInt(totalCidadaes);
-            int ind4 = gerador.nextInt(totalCidadaes);
             ArrayList<Cidade> cloneCnjInicial = new ArrayList<>(cnjInicial);
 
             Collections.swap(cloneCnjInicial, ind1, ind2);
-            Collections.swap(cloneCnjInicial, ind3, ind4);
+
+            ind1 = gerador.nextInt(TOTAL_CIDADES);
+            ind2 = gerador.nextInt(TOTAL_CIDADES);
+            Collections.swap(cloneCnjInicial, ind1, ind2);
 
             return cloneCnjInicial;
         }
@@ -76,22 +76,23 @@ class Moa {
             Random gerador = new Random();
 
             ArrayList<Cidade> cloneCnjInicial = new ArrayList<>(cnjInicial);
-
-            int ind1 = gerador.nextInt(totalCidadaes);
-            int ind2 = gerador.nextInt(totalCidadaes);
-            Collections.swap(cloneCnjInicial, ind1, ind2);
+            for (int i = 0; i < TOTAL_CIDADES / 2; i++) {
+                int ind1 = gerador.nextInt(totalCidadaes);
+                int ind2 = gerador.nextInt(totalCidadaes);
+                Collections.swap(cloneCnjInicial, ind1, ind2);
+            }
 
             return cloneCnjInicial;
         }
 
     }
 
-    protected Rota getRotaInicial() {
+    protected Rota getRotaInicial(int entradaM) {
         ArrayList<Cidade> cidadesIniciais = new ArrayList<>();
         Rota rota = new Rota();
-        String[] entrada = Utils.getEntrada();
+        String[] entrada = Utils.getEntrada(entradaM);
         TOTAL_CIDADES = Integer.parseInt(entrada[0]);
-        for (int i = 1; i <= 48; i++) {
+        for (int i = 1; i <= TOTAL_CIDADES; i++) {
             Cidade cidade = new Cidade();
             String[] arrCordenada = entrada[i].split(" ");
             cidade.idCidade = Integer.parseInt(arrCordenada[0]);
@@ -133,8 +134,7 @@ class Moa {
     protected Rota gerarDistancias(Rota populacao) {
         ArrayList<Cidade> cnjInicial = populacao.getRota();
         for (int i = 0; i < cnjInicial.size() - 1; i++) {
-            populacao.distancia
-                    += calcularDistancia2Pontos(cnjInicial.get(i), cnjInicial.get(i + 1));
+            populacao.distancia += calcularDistancia2Pontos(cnjInicial.get(i), cnjInicial.get(i + 1));
         }
         return populacao;
     }
@@ -217,7 +217,7 @@ class Moa {
 
     protected void cruzamento(Rota rotaX, Rota rotaY) {
         int meio = Math.round(rotaX.getRota().size() / 2) - 1;
-        int pontoCorte = Math.round(rotaX.getRota().size() / 8);
+        int pontoCorte = Math.round(rotaX.getRota().size() / TAMANHO_CORTE);
         int sizeRotas = rotaX.getRota().size();
         boolean inHash = false;
         HashMap<Integer, Integer> novaRotaA = new HashMap<>();
@@ -226,7 +226,7 @@ class Moa {
         HashMap<Integer, Cidade> hashFinderB = new HashMap<>();
         inicializarNovasRotas(novaRotaA, novaRotaB, sizeRotas);
 
-        for (int i = meio - pontoCorte; i <= meio + pontoCorte; i++) {
+        for (int i = meio - pontoCorte; i < meio + pontoCorte; i++) {
             novaRotaA.put(i, rotaX.getRota().get(i).idCidade);
             hashFinderA.put(i, rotaX.getRota().get(i));
             novaRotaB.put(i, rotaY.getRota().get(i).idCidade);
@@ -254,19 +254,18 @@ class Moa {
     protected Rota executarBuscaLocal(Rota rotaAtual, boolean first) {
 
         ArrayList<Cidade> rota = new ArrayList<>();
-        Rota melhorRota = new Rota();
         rota = rotaAtual.getRota();
-        melhorRota = rotaAtual;
+        Rota melhorRota = rotaAtual;
         for (int i = 0; i < TOTAL_CIDADES - 3; i++) {
             ArrayList<Cidade> cloneRota = new ArrayList<>(rotaAtual.getRota());
-            cloneRota.set(i, rota.get(i + 3));
-            cloneRota.set(i + 1, rota.get(i + 2));
-            cloneRota.set(i + 2, rota.get(i + 1));
-            cloneRota.set(i + 3, rota.get(i));
+            Collections.swap(rota, i, i + 3);
+            Collections.swap(rota, i + 1, i + 2);
+            Collections.swap(rota, i + 2, i + 1);
+            Collections.swap(rota, i + 3, i);
             Rota rotaVizinho = new Rota();
             rotaVizinho.setRota(rota);
             gerarDistancias(rotaVizinho);
-            if (rotaVizinho.distancia < rotaAtual.distancia) {
+            if (rotaVizinho.distancia < melhorRota.distancia) {
                 melhorRota = rotaAtual;
                 if (first) {
                     break;
@@ -276,15 +275,15 @@ class Moa {
         return melhorRota;
     }
 
-    protected Rota executarGeneticoPcv() {
+    protected Rota executarGeneticoPcv(int rotaM) {
         long t = System.currentTimeMillis();
         long end = t + 9499;
-        Rota rotaInicial = getRotaInicial();
+        Rota rotaInicial = getRotaInicial(rotaM);
 
         populacao.put(rotaInicial.idRota, rotaInicial);
         avaliacao(populacao);
 
-        for (int i = 0; i < TOTAL_POPULACAO; i++) {
+        for (int i = 0; i < (TOTAL_POPULACAO - 1); i++) {
             Rota conjuntoPermutado = new Rota();
             conjuntoPermutado.setRota(rotaInicial.getPermutacaoCnjCidade(rotaInicial.getRota(), TOTAL_CIDADES));
             populacao.put(conjuntoPermutado.idRota, conjuntoPermutado);
@@ -301,17 +300,22 @@ class Moa {
         }
 
         Rota menorDistancia = Q.remove();
+        System.out.print((int) menorDistancia.distancia);
+        menorDistancia = executarBuscaLocal(menorDistancia, FIRST_IMPROVEMENT);
 
-        if (FAZER_BUSCA_LOCAL) {
-            menorDistancia = executarBuscaLocal(menorDistancia, false);
-        }
         return menorDistancia;
     }
 
     public static void main(String[] args) {
         Moa moa = new Moa();
-        Rota result = moa.executarGeneticoPcv();
-        System.out.println((int) result.distancia);
+        //Scanner dados = new Scanner(System.in);
+        int casoDeTeste = Integer.parseInt(args[0]);
+        TOTAL_POPULACAO = Integer.parseInt(args[1]);
+        TAMANHO_CORTE = Integer.parseInt(args[2]);
+        FIRST_IMPROVEMENT = Boolean.parseBoolean(args[3]);
+
+        Rota result = moa.executarGeneticoPcv(casoDeTeste);
+        System.out.print("#" + (int) result.distancia);
     }
 
 }
