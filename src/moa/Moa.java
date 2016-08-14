@@ -15,7 +15,7 @@ class Moa {
     static HashMap<Integer, Rota> populacao = new HashMap<>();
     static int TOTAL_POPULACAO = 40;
     static int TAMANHO_CORTE = 6;
-    static boolean FIRST_IMPROVEMENT = false;
+    static boolean FIRST_IMPROVEMENT = true;
 
     class Cidade {
 
@@ -134,7 +134,8 @@ class Moa {
     protected Rota gerarDistancias(Rota populacao) {
         ArrayList<Cidade> cnjInicial = populacao.getRota();
         for (int i = 0; i < cnjInicial.size() - 1; i++) {
-            populacao.distancia += calcularDistancia2Pontos(cnjInicial.get(i), cnjInicial.get(i + 1));
+            populacao.distancia
+                    += calcularDistancia2Pontos(cnjInicial.get(i), cnjInicial.get(i + 1));
         }
         return populacao;
     }
@@ -258,14 +259,14 @@ class Moa {
         Rota melhorRota = rotaAtual;
         for (int i = 0; i < TOTAL_CIDADES - 3; i++) {
             ArrayList<Cidade> cloneRota = new ArrayList<>(rotaAtual.getRota());
-            Collections.swap(rota, i, i + 3);
-            Collections.swap(rota, i + 1, i + 2);
-            Collections.swap(rota, i + 2, i + 1);
-            Collections.swap(rota, i + 3, i);
+            cloneRota.set(i, rota.get(i + 3));
+            cloneRota.set(i + 1, rota.get(i + 2));
+            cloneRota.set(i + 2, rota.get(i + 1));
+            cloneRota.set(i + 3, rota.get(i));
             Rota rotaVizinho = new Rota();
             rotaVizinho.setRota(rota);
             gerarDistancias(rotaVizinho);
-            if (rotaVizinho.distancia < melhorRota.distancia) {
+            if (rotaVizinho.distancia < rotaAtual.distancia) {
                 melhorRota = rotaAtual;
                 if (first) {
                     break;
@@ -300,7 +301,7 @@ class Moa {
         }
 
         Rota menorDistancia = Q.remove();
-        System.out.print((int) menorDistancia.distancia);
+        System.out.print(menorDistancia.distancia);
         menorDistancia = executarBuscaLocal(menorDistancia, FIRST_IMPROVEMENT);
 
         return menorDistancia;
