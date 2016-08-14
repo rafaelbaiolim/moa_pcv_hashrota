@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Random;
-import java.util.Scanner;
 
 class Moa {
 
@@ -15,7 +14,7 @@ class Moa {
     static HashMap<Integer, Rota> populacao = new HashMap<>();
     static int TOTAL_POPULACAO = 40;
     static int TAMANHO_CORTE = 6;
-    static boolean FIRST_IMPROVEMENT = true;
+    static boolean FIRST_IMPROVEMENT = false;
 
     class Cidade {
 
@@ -227,7 +226,7 @@ class Moa {
         HashMap<Integer, Cidade> hashFinderB = new HashMap<>();
         inicializarNovasRotas(novaRotaA, novaRotaB, sizeRotas);
 
-        for (int i = meio - pontoCorte; i < meio + pontoCorte; i++) {
+        for (int i = meio - pontoCorte; i <= meio + pontoCorte; i++) {
             novaRotaA.put(i, rotaX.getRota().get(i).idCidade);
             hashFinderA.put(i, rotaX.getRota().get(i));
             novaRotaB.put(i, rotaY.getRota().get(i).idCidade);
@@ -258,20 +257,20 @@ class Moa {
         rota = rotaAtual.getRota();
         Rota melhorRota = rotaAtual;
         for (int i = 0; i < TOTAL_CIDADES - 3; i++) {
-            ArrayList<Cidade> cloneRota = new ArrayList<>(rotaAtual.getRota());
-            cloneRota.set(i, rota.get(i + 3));
-            cloneRota.set(i + 1, rota.get(i + 2));
-            cloneRota.set(i + 2, rota.get(i + 1));
-            cloneRota.set(i + 3, rota.get(i));
+            ArrayList<Cidade> cloneRota = new ArrayList<>(rota);
+            Collections.swap(cloneRota, i, i + 3);
+            Collections.swap(cloneRota, i + 1, i + 2);
+
             Rota rotaVizinho = new Rota();
-            rotaVizinho.setRota(rota);
+            rotaVizinho.setRota(cloneRota);
             gerarDistancias(rotaVizinho);
-            if (rotaVizinho.distancia < rotaAtual.distancia) {
-                melhorRota = rotaAtual;
+            if (rotaVizinho.distancia < melhorRota.distancia) {
+                melhorRota = rotaVizinho;
                 if (first) {
-                    break;
+                    return melhorRota;
                 }
             }
+            rota = cloneRota;
         }
         return melhorRota;
     }
@@ -301,7 +300,7 @@ class Moa {
         }
 
         Rota menorDistancia = Q.remove();
-        System.out.print(menorDistancia.distancia);
+        System.out.println((int) menorDistancia.distancia);
         menorDistancia = executarBuscaLocal(menorDistancia, FIRST_IMPROVEMENT);
 
         return menorDistancia;
@@ -310,13 +309,10 @@ class Moa {
     public static void main(String[] args) {
         Moa moa = new Moa();
         //Scanner dados = new Scanner(System.in);
-        int casoDeTeste = Integer.parseInt(args[0]);
-        TOTAL_POPULACAO = Integer.parseInt(args[1]);
-        TAMANHO_CORTE = Integer.parseInt(args[2]);
-        FIRST_IMPROVEMENT = Boolean.parseBoolean(args[3]);
+        int casoDeTeste = 48;
 
         Rota result = moa.executarGeneticoPcv(casoDeTeste);
-        System.out.print("#" + (int) result.distancia);
+        System.out.println("#" + (int) result.distancia);
     }
 
 }
