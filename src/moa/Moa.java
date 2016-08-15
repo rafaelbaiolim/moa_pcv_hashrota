@@ -1,3 +1,7 @@
+/**
+ * Rafael Altar - ra 83021
+ * Vanessa Nakahara - ra 83550
+ */
 package moa;
 
 import java.util.Collections;
@@ -6,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Random;
+import java.util.Scanner;
 
 class Moa {
 
@@ -86,24 +91,6 @@ class Moa {
 
     }
 
-    protected Rota getRotaInicial(int entradaM) {
-        ArrayList<Cidade> cidadesIniciais = new ArrayList<>();
-        Rota rota = new Rota();
-        String[] entrada = Utils.getEntrada(entradaM);
-        TOTAL_CIDADES = Integer.parseInt(entrada[0]);
-        for (int i = 1; i <= TOTAL_CIDADES; i++) {
-            Cidade cidade = new Cidade();
-            String[] arrCordenada = entrada[i].split(" ");
-            cidade.idCidade = Integer.parseInt(arrCordenada[0]);
-            cidade.x = Double.parseDouble(arrCordenada[1]);  // coordenada X
-            cidade.y = Double.parseDouble(arrCordenada[2]); // coordenada Y
-            cidadesIniciais.add(cidade);
-        }
-        rota.setRota(cidadesIniciais);
-        return rota;
-    }
-
-    /*
     protected Rota getRotaInicial() {
         Scanner scan = new Scanner(System.in);
         String linha = scan.nextLine();
@@ -118,13 +105,14 @@ class Moa {
             linha = scan.nextLine().replaceAll(" +", " ");
             String[] arrCordenada = linha.split(" ");
             cidade.idCidade = Integer.parseInt(arrCordenada[0]);
-            cidade.x = Double.parseDouble(arrCordenada[1]);  // coordenada X
-            cidade.y = Double.parseDouble(arrCordenada[2]); // coordenada Y
+            cidade.x = Float.parseFloat(arrCordenada[1]);  // coordenada X
+            cidade.y = Float.parseFloat(arrCordenada[2]); // coordenada Y
             cidadesRotaInicial.add(cidade);
         }
         rotaInicial.setRota(cidadesRotaInicial);
         return rotaInicial;
-    }*/
+    }
+
     protected double calcularDistancia2Pontos(Cidade cidadeA, Cidade cidadeB) {
         return Math.sqrt(Math.pow((cidadeA.x - cidadeB.x), 2)
                 + Math.pow((cidadeA.y - cidadeB.y), 2));
@@ -275,10 +263,10 @@ class Moa {
         return melhorRota;
     }
 
-    protected Rota executarGeneticoPcv(int rotaM) {
+    protected Rota executarGeneticoPcv() {
         long t = System.currentTimeMillis();
-        long end = t + 9499;
-        Rota rotaInicial = getRotaInicial(rotaM);
+        long end = t + 60000;
+        Rota rotaInicial = getRotaInicial();
 
         populacao.put(rotaInicial.idRota, rotaInicial);
         avaliacao(populacao);
@@ -300,7 +288,7 @@ class Moa {
         }
 
         Rota menorDistancia = Q.remove();
-        System.out.print((int) menorDistancia.distancia);
+        System.out.println("Menor : " + menorDistancia.distancia);
         menorDistancia = executarBuscaLocal(menorDistancia, FIRST_IMPROVEMENT);
 
         return menorDistancia;
@@ -308,10 +296,9 @@ class Moa {
 
     public static void main(String[] args) {
         Moa moa = new Moa();
-        //Scanner dados = new Scanner(System.in);
 
-        Rota result = moa.executarGeneticoPcv(48);
-        System.out.print(result.distancia);
+        Rota result = moa.executarGeneticoPcv();
+        System.out.println("Buca local : " + result.distancia);
     }
 
 }
